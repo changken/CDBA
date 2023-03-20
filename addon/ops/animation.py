@@ -25,18 +25,67 @@ def packData(data):
     length = length.zfill(8)
     return length.encode('utf-8') + data
 
-def driveCharacter(rotations, translation):
+def driveCharacters(self, rotationss, translations, dims):
     try:
         scene = bpy.context.scene
-        character = bpy.data.objects[scene.character_name]
-        armature = bpy.data.armatures[scene.armature_name]
+        character_names = str(scene.character_name).split(";")
+        armature_names = str(scene.armature_name).split(";")
+
+        for i in range(int(dims)):
+            # 檢查是否有多個角色
+            character = bpy.data.objects[character_names[i]]
+            armature = bpy.data.armatures[armature_names[i]]
+            
+            pelvis_bone = armature.bones['Pelvis']
+            pelvis_position = Vector(pelvis_bone.head)
+            bones = character.pose.bones
+            bones_name = ['Pelvis','L_Hip','R_Hip','Spine1','L_Knee','R_Knee','Spine2','L_Ankle','R_Ankle','Spine3','L_Foot','R_Foot','Neck','L_Collar','R_Collar','Head','L_Shoulder','R_Shoulder','L_Elbow','R_Elbow','L_Wrist','R_Wrist']
+
+            rotations = np.array(rotationss[i])
+            translation = np.array(translations[i])
+
+            scene.frame_current += scene.insert_interval
+            if scene.translation:
+                bones['Pelvis'].location = Vector((100 * translation[0], -100 * translation[1], -100 * translation[2]))
+            else:
+                bones['Pelvis'].location = Vector((0, 0, 0))
+
+            if scene.insert_keyframe:
+                bones['Pelvis'].keyframe_insert('location')
+
+            for index in range(len(bones_name)):
+                bone = bones[bones_name[index]]
+
+                bone_rotation = Quaternion(Vector((rotations[4 * index], rotations[4 * index + 1], rotations[4 * index + 2])), rotations[4 * index + 3])
+                quat_x_180_cw = Quaternion((1.0, 0.0, 0.0), radians(-180))
+                
+
+                if bones_name[index] == 'Pelvis':
+                    bone.rotation_quaternion = (quat_x_180_cw ) @ bone_rotation
+                else:
+                    bone.rotation_quaternion = bone_rotation
+                if scene.insert_keyframe:
+                    bone.keyframe_insert('rotation_quaternion', frame = scene.frame_current)
+
+            scene.frame_end = scene.frame_current
+        
+        return True
+    except Exception as e:
+        print(e)
+        return False
+
+def driveCharacter(self, rotations, translation):
+    try:
+        scene = bpy.context.scene
+        character = bpy.data.objects[str(scene.character_name).split(';')[0]]
+        armature = bpy.data.armatures[str(scene.armature_name).split(';')[0]]
         pelvis_bone = armature.bones['Pelvis']
         pelvis_position = Vector(pelvis_bone.head)
         bones = character.pose.bones
         bones_name = ['Pelvis','L_Hip','R_Hip','Spine1','L_Knee','R_Knee','Spine2','L_Ankle','R_Ankle','Spine3','L_Foot','R_Foot','Neck','L_Collar','R_Collar','Head','L_Shoulder','R_Shoulder','L_Elbow','R_Elbow','L_Wrist','R_Wrist']
 
-        rotations = np.array(rotations)
-        translation = np.array(translation)
+        rotations = np.array(rotations[0])
+        translation = np.array(translation[0])
 
         scene.frame_current += scene.insert_interval
         if scene.translation:
@@ -63,7 +112,8 @@ def driveCharacter(rotations, translation):
 
         scene.frame_end = scene.frame_current
         return True
-    except:
+    except Exception as e:
+        self.report({"ERROR"}, e)
         return False
 
 class OfflineAnimation(Operator, ImportHelper):
@@ -108,9 +158,9 @@ class OfflineAnimation(Operator, ImportHelper):
 
             if data != 'none':
                 data = json.loads(data)
-                if not driveCharacter(data['poses'], data['trans']):
-                    self.report({"ERROR"}, "The armature/character's name is not found or the bones is not fixed")
-
+                if not driveCharacters(self, data['poses'], data['trans'], data['dims']):
+                    self.report({"ERROR"}, "The armature/character's name is not found or the bones is not fixed!!!!")
+            
             done = json.dumps(
                 {
                     'type':'done'
@@ -155,8 +205,8 @@ class OfflineAnimation(Operator, ImportHelper):
                 data = self.client.recv(4096).decode('utf-8')
                 if data != 'none':
                     data = json.loads(data)
-                    if not driveCharacter(data['poses'], data['trans']):
-                        self.report({"ERROR"}, "The armature/character's name is not found or the bones is not fixed")
+                    if not driveCharacters(self, data['poses'], data['trans'], data['dims']):
+                        self.report({"ERROR"}, "The armature/character's name is not found or the bones is not fixed!!!!")
                         self.close(ctx)
                         return {'FINISHED'}
             else:
@@ -228,8 +278,8 @@ class WebcamAnimation(Operator):
             data = self.client.recv(4096).decode('utf-8')
             if data != 'none':
                 data = json.loads(data)
-                if not driveCharacter(data['poses'], data['trans']):
-                    self.report({"ERROR"}, "The armature/character's name is not found or the bones is not fixed")
+                if not driveCharacters(self, data['poses'], data['trans'], data['dims']):
+                    self.report({"ERROR"}, "The armature/character's name is not found or the bones is not fixed!!!!")
                     self.close(ctx)
                     return {'FINISHED'}
 

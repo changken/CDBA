@@ -15,6 +15,14 @@ class COMMON_PT_myPanel(bpy.types.Panel):
         row = col.row(align = True)
         row.prop(ctx.scene, 'armature_name', text='Armature')
 
+        '''
+        row = col.row(align = True)
+        row.prop(ctx.scene, 'character_name2', text='Character')
+
+        row = col.row(align = True)
+        row.prop(ctx.scene, 'armature_name2', text='Armature')
+        '''
+        
         row = col.row(align = True)
         row.prop(ctx.scene, 'ip', text='IP')
 

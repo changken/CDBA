@@ -87,13 +87,18 @@ def run_romp(client, receiver, sender, run, mode, gpu):
                 client.send('none'.encode('utf-8'))
                 continue
             
-            poses = getAxisAngle(outputs_all['smpl_thetas'])[0]
+            poses = getAxisAngle(outputs_all['smpl_thetas'])
+            #poses = np.array(poses)
             if 'cam_trans' not in outputs_all:
                 trans = convert_cam_to_3d_trans(outputs_all['cam']).tolist()
             else:
                 trans = outputs_all['cam_trans'].tolist()
+            #trans = np.array(trans)
 
-            outputs = {'poses': poses, 'trans': trans[0]}
+            outputs = {'poses': poses, 'trans': trans, 'dims': np.array(poses).shape[0]}
+            print("poses", np.array(poses).shape)
+            print("trans", np.array(trans).shape)
+            print("dims", np.array(poses).shape[0])
 
             try:
                 sender.put(outputs)

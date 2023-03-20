@@ -1,6 +1,6 @@
 bl_info = {
     'category': '3D View',
-    "version" : (1, 0, 0),
+    "version" : (1, 0, 1),
     "blender" : (2, 93, 0),
     "author" : "Chuanhang Yan",
     "name" : "CharacterDriven-BlenderAddon",
@@ -25,6 +25,8 @@ CLASSES = [
 PROPS = [
     ('character_name',bpy.props.StringProperty(name='armature_name', default='Armature')),
     ('armature_name',bpy.props.StringProperty(name='character_name', default='Armature')),
+    #('character_name2',bpy.props.StringProperty(name='armature_name2', default='Armature_2')),
+    #('armature_name2',bpy.props.StringProperty(name='character_name2', default='Armature_2')),
     ('ip',bpy.props.StringProperty(name='ip', default='127.0.0.1')),
     ('port',bpy.props.StringProperty(name='port', default='10005')),
     ('fps',bpy.props.IntProperty(name='fps', default=24)),
