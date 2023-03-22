@@ -29,56 +29,59 @@ def packData(data):
     length = length.zfill(8)
     return length.encode('utf-8') + data
 
-def updateCharacter(i, scene, character_names, armature_names, rotationss, translations):
-    # 檢查是否有多個角色
-    character = bpy.data.objects[character_names[i]]
-    armature = bpy.data.armatures[armature_names[i]]
-    
-    pelvis_bone = armature.bones['Pelvis']
-    pelvis_position = Vector(pelvis_bone.head)
-    bones = character.pose.bones
-    bones_name = ['Pelvis','L_Hip','R_Hip','Spine1','L_Knee','R_Knee','Spine2','L_Ankle','R_Ankle','Spine3','L_Foot','R_Foot','Neck','L_Collar','R_Collar','Head','L_Shoulder','R_Shoulder','L_Elbow','R_Elbow','L_Wrist','R_Wrist']
-
-    rotations = np.array(rotationss[i])
-    translation = np.array(translations[i])
-
-    scene.frame_current += scene.insert_interval
-    if scene.translation:
-        bones['Pelvis'].location = Vector((100 * translation[0], -100 * translation[1], -100 * translation[2]))
-    else:
-        bones['Pelvis'].location = Vector((0, 0, 0))
-
-    if scene.insert_keyframe:
-        bones['Pelvis'].keyframe_insert('location')
-
-    for index in range(len(bones_name)):
-        bone = bones[bones_name[index]]
-
-        bone_rotation = Quaternion(Vector((rotations[4 * index], rotations[4 * index + 1], rotations[4 * index + 2])), rotations[4 * index + 3])
-        quat_x_180_cw = Quaternion((1.0, 0.0, 0.0), radians(-180))
-        
-
-        if bones_name[index] == 'Pelvis':
-            bone.rotation_quaternion = (quat_x_180_cw ) @ bone_rotation
-        else:
-            bone.rotation_quaternion = bone_rotation
-        if scene.insert_keyframe:
-            bone.keyframe_insert('rotation_quaternion', frame = scene.frame_current)
-
-    scene.frame_end = scene.frame_current
-    return
-
 def driveCharacters(self, rotationss, translations, dims):
     try:
         scene = bpy.context.scene
         character_names = str(scene.character_name).split(";")
         armature_names = str(scene.armature_name).split(";")
 
-        mpList = deque()
-        for i in range(int(dims)):
-            m = threading.Thread(target=updateCharacter, args=(i, scene, character_names, armature_names, rotationss, translations))
-            m.start()
-            mpList.append(m)
+        
+        # 檢查是否有多個角色
+        characters = []
+        armatures = []
+        for j in range(len(character_names)):
+            characters.append(bpy.data.objects[character_names[j]])
+            armatures.append(bpy.data.armatures[armature_names[j]])
+        
+        pelvis_bones = []
+        bones = []
+
+        for j in range(len(armatures)):
+            pelvis_bones.append(armatures[j].bones['Pelvis'])
+            pelvis_position = Vector(pelvis_bones[j].head)
+            bones.append(characters[j].pose.bones)
+
+        bones_name = ['Pelvis','L_Hip','R_Hip','Spine1','L_Knee','R_Knee','Spine2','L_Ankle','R_Ankle','Spine3','L_Foot','R_Foot','Neck','L_Collar','R_Collar','Head','L_Shoulder','R_Shoulder','L_Elbow','R_Elbow','L_Wrist','R_Wrist']
+
+        rotations = np.array(rotationss)
+        translation = np.array(translations)
+
+        scene.frame_current += scene.insert_interval
+        for i in range(int(dims)): 
+            if scene.translation:
+                bones[i]['Pelvis'].location = Vector((100 * translation[i][0], -100 * translation[i][1], -100 * translation[i][2]))
+            else:
+                bones[i]['Pelvis'].location = Vector((0, 0, 0))
+
+            if scene.insert_keyframe:
+                bones[i]['Pelvis'].keyframe_insert('location')
+
+        for index in range(len(bones_name)):
+            for i in range(int(dims)): 
+                bone = bones[i][bones_name[index]]
+
+                bone_rotation = Quaternion(Vector((rotations[i][4 * index], rotations[i][4 * index + 1], rotations[i][4 * index + 2])), rotations[i][4 * index + 3])
+                quat_x_180_cw = Quaternion((1.0, 0.0, 0.0), radians(-180))
+                
+
+                if bones_name[index] == 'Pelvis':
+                    bone.rotation_quaternion = (quat_x_180_cw ) @ bone_rotation
+                else:
+                    bone.rotation_quaternion = bone_rotation
+                if scene.insert_keyframe:
+                    bone.keyframe_insert('rotation_quaternion', frame = scene.frame_current)
+
+        scene.frame_end = scene.frame_current
 
         return True
     except Exception as e:
