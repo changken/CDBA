@@ -59,7 +59,9 @@ def decodeImg(img_string):
 def run_romp(client, receiver, sender, run, mode, gpu):
     settings = romp.main.default_settings
     settings.mode = mode
-    settings.smooth_coeff = 1
+    # settings.smooth_coeff = 1
+    settings.temporal_optimize = True
+    settings.smooth_coeff = 0.05
 
     if gpu == 'True' and torch.cuda.is_available():
         print(gpu)
@@ -68,7 +70,8 @@ def run_romp(client, receiver, sender, run, mode, gpu):
     else:
         settings.onnx = True
         settings.gpu = -1
-    settings.show_largest = True
+    ##settings.show_largest = True
+    settings.show_largest = False
     romp_model = romp.ROMP(settings)
 
     while run.value:
@@ -122,7 +125,7 @@ def recv_data(client, address):
     dataBuffer = b''
     
     while True:
-        data = client.recv(16384)
+        data = client.recv(32768) # enlarge
         if data:
             dataBuffer += data
             while True:

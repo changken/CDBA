@@ -77,7 +77,12 @@ def driveCharacters(self, rotationss, translations, dims):
                 if bones_name[index] == 'Pelvis':
                     bone.rotation_quaternion = (quat_x_180_cw ) @ bone_rotation
                 else:
-                    bone.rotation_quaternion = bone_rotation
+                    # 跳過骨盆以下的骨頭
+                    if index in [1, 2, 4, 5, 7, 8, 10, 11]:
+                        print("pass")
+                        continue
+                    else:
+                        bone.rotation_quaternion = bone_rotation
                 if scene.insert_keyframe:
                     bone.keyframe_insert('rotation_quaternion', frame = scene.frame_current)
 
