@@ -173,7 +173,7 @@ class OfflineAnimation(Operator, ImportHelper):
             ).encode('utf-8')
             img_package = packData(image)
             self.client.send(img_package)
-            data = self.client.recv(4096).decode('utf-8')
+            data = self.client.recv(8192).decode('utf-8')
 
             if data != 'none':
                 data = json.loads(data)
@@ -221,7 +221,7 @@ class OfflineAnimation(Operator, ImportHelper):
                 img_package = packData(image)
                 self.client.send(img_package)
 
-                data = self.client.recv(4096).decode('utf-8')
+                data = self.client.recv(8192).decode('utf-8')
                 if data != 'none':
                     data = json.loads(data)
                     if not driveCharacters(self, data['poses'], data['trans'], data['dims']):
@@ -294,7 +294,7 @@ class WebcamAnimation(Operator):
             ).encode('utf-8')
             img_package = packData(image)
             self.client.send(img_package)
-            data = self.client.recv(4096).decode('utf-8')
+            data = self.client.recv(8192).decode('utf-8')
             if data != 'none':
                 data = json.loads(data)
                 if not driveCharacters(self, data['poses'], data['trans'], data['dims']):
