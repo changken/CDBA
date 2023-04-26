@@ -91,6 +91,11 @@ def run_romp(client, receiver, sender, run, mode, gpu):
                 continue
             
             poses = getAxisAngle(outputs_all['smpl_thetas'])
+
+            track_ids = outputs_all['track_ids']
+            poses_arr = [[] for _ in range(len(track_ids))]
+            for i, v in enumerate(track_ids):
+                poses_arr[v-1] = poses[i]
             #poses = np.array(poses)
             if 'cam_trans' not in outputs_all:
                 trans = convert_cam_to_3d_trans(outputs_all['cam']).tolist()
@@ -98,7 +103,7 @@ def run_romp(client, receiver, sender, run, mode, gpu):
                 trans = outputs_all['cam_trans'].tolist()
             #trans = np.array(trans)
 
-            outputs = {'poses': poses, 'trans': trans, 'dims': np.array(poses).shape[0]}
+            outputs = {'poses': poses_arr, 'trans': trans, 'dims': np.array(poses).shape[0]}
             print("poses", np.array(poses).shape)
             print("trans", np.array(trans).shape)
             print("dims", np.array(poses).shape[0])
@@ -168,7 +173,7 @@ def recv_data(client, address):
           
 if __name__ == '__main__':
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind(('127.0.0.1', int(sys.argv[1])))
+    server.bind(('0.0.0.0', int(sys.argv[1])))
     server.listen(5)
     print('Waiting for connection on port {}'.format(sys.argv[1]))
 
