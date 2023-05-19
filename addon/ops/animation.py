@@ -196,6 +196,7 @@ class OfflineAnimation(Operator, ImportHelper):
                     'type': 'init',
                     'gpu': str(ctx.scene.gpu),
                     'mode': 'video',
+                    'num_of_person': int(ctx.scene.num_of_person)
                 }
             ).encode('utf-8')
             self.client.send(packData(init))
@@ -268,6 +269,7 @@ class WebcamAnimation(Operator):
                 'type': 'init',
                 'gpu': str(ctx.scene.gpu),
                 'mode': 'webcam',
+                'num_of_person': int(ctx.scene.num_of_person)
             }
         ).encode('utf-8')
         self.client.send(packData(init))

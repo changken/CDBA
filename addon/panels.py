@@ -45,6 +45,9 @@ class COMMON_PT_myPanel(bpy.types.Panel):
         row.prop(ctx.scene, 'quality', text='Compression(0~100)')
 
         row = col.row(align = True)
+        row.prop(ctx.scene, 'num_of_person', text='Number of person(1~4)')
+
+        row = col.row(align = True)
         row.operator("ops.fix_bones", text = "Fix Bones")
         
 

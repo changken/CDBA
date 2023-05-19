@@ -35,6 +35,7 @@ PROPS = [
     ('gpu',bpy.props.BoolProperty(name='gpu', default=True)),
     ('translation',bpy.props.BoolProperty(name='translation', default=True)),
     ('quality',bpy.props.IntProperty(name='quality', default=60)),
+    ('num_of_person',bpy.props.IntProperty(name='num_of_person', default=2)),
     ('width',bpy.props.IntProperty(name='width', default=640)),
     ('height',bpy.props.IntProperty(name='height', default=480)),
 ]

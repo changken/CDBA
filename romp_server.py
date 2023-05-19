@@ -56,7 +56,35 @@ def decodeImg(img_string):
     img_array = cv2.imdecode(img_encode, cv2.IMREAD_COLOR)
     return img_array
 
-def run_romp(client, receiver, sender, run, mode, gpu):
+# 過濾多餘的人體姿態 或 跳號
+def take_two(e):
+    return e[1]
+
+def reordering(source_track_ids, source_data, target_track_ids):
+    t = sorted(source_track_ids)
+    # 如果沒有排序 # 就排序
+    if t != source_track_ids or len(source_track_ids) != len(target_track_ids) or t != target_track_ids:
+        # 如果排序後跟target_track_ids不一樣
+        #if t != target_track_ids:
+        modify_arr = [(k, v) for (k, v) in enumerate(source_track_ids)]
+        modify_arr = sorted(modify_arr, key=take_two)
+        print(modify_arr)
+
+
+        if len(source_track_ids) < len(target_track_ids):
+            target_data = [None] * len(source_track_ids)
+            for i in range(len(source_track_ids)):
+                target_data[i] = source_data[modify_arr[i][0]]
+        else: 
+            target_data = [None] * len(target_track_ids)
+            for i in range(len(target_track_ids)):
+                target_data[i] = source_data[modify_arr[i][0]]
+
+        return target_data
+    
+    return source_data
+
+def run_romp(client, receiver, sender, run, mode, gpu, num_of_person):
     settings = romp.main.default_settings
     settings.mode = mode
     # settings.smooth_coeff = 1
@@ -70,7 +98,7 @@ def run_romp(client, receiver, sender, run, mode, gpu):
     else:
         settings.onnx = True
         settings.gpu = -1
-    ##settings.show_largest = True
+    # settings.show_largest = True
     settings.show_largest = False
     romp_model = romp.ROMP(settings)
 
@@ -92,10 +120,16 @@ def run_romp(client, receiver, sender, run, mode, gpu):
             
             poses = getAxisAngle(outputs_all['smpl_thetas'])
 
+            target_track_ids = [i for i in range(1,num_of_person+1)]
+
+            poses_arr = reordering(outputs_all['track_ids'].tolist(), poses, target_track_ids)
+
+            '''
             track_ids = outputs_all['track_ids']
             poses_arr = [[] for _ in range(len(track_ids))]
             for i, v in enumerate(track_ids):
                 poses_arr[v-1] = poses[i]
+            '''
             #poses = np.array(poses)
             if 'cam_trans' not in outputs_all:
                 trans = convert_cam_to_3d_trans(outputs_all['cam']).tolist()
@@ -103,10 +137,12 @@ def run_romp(client, receiver, sender, run, mode, gpu):
                 trans = outputs_all['cam_trans'].tolist()
             #trans = np.array(trans)
 
-            outputs = {'poses': poses_arr, 'trans': trans, 'dims': np.array(poses).shape[0]}
-            print("poses", np.array(poses).shape)
+            outputs = {'poses': poses_arr, 'trans': trans, 'dims': np.array(poses_arr).shape[0]}
+            print("original poses", np.array(poses).shape)
+            print("poses_arr", np.array(poses_arr).shape)
             print("trans", np.array(trans).shape)
-            print("dims", np.array(poses).shape[0])
+            print("original dims", np.array(poses).shape[0])
+            print("dims", np.array(poses_arr).shape[0])
 
             try:
                 sender.put(outputs)
@@ -147,8 +183,9 @@ def recv_data(client, address):
                 if type == 'init':
                     gpu = body['gpu']
                     mode = body['mode']
+                    num_of_person = body['num_of_person']
                     # Create a new process for ROMP to process the image
-                    p = Process(target=run_romp, args=(client, receiver, sender, run, mode, gpu))
+                    p = Process(target=run_romp, args=(client, receiver, sender, run, mode, gpu, num_of_person))
                     print('Started ROMP process')
                     p.start()
                     # Create a new process to send the poses to the client
