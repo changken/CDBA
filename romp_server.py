@@ -86,10 +86,11 @@ def reordering(source_track_ids, source_data, target_track_ids):
 
 def run_romp(client, receiver, sender, run, mode, gpu, num_of_person):
     settings = romp.main.default_settings
+    settings.webcam_id = 0
     settings.mode = mode
     # settings.smooth_coeff = 1
     settings.temporal_optimize = True
-    settings.smooth_coeff = 0.05
+    settings.smooth_coeff = 0.2
 
     if gpu == 'True' and torch.cuda.is_available():
         print(gpu)
