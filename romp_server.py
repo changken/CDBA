@@ -2,6 +2,7 @@ import os
 import sys
 import cv2
 import romp
+import bev
 import json
 import torch
 import socket
@@ -85,6 +86,7 @@ def reordering(source_track_ids, source_data, target_track_ids):
     return source_data
 
 def run_romp(client, receiver, sender, run, mode, gpu, num_of_person):
+    # settings = bev.main.default_settings
     settings = romp.main.default_settings
     settings.webcam_id = 0
     settings.mode = mode
@@ -101,6 +103,7 @@ def run_romp(client, receiver, sender, run, mode, gpu, num_of_person):
         settings.gpu = -1
     # settings.show_largest = True
     settings.show_largest = False
+    # romp_model = bev.BEV(settings)
     romp_model = romp.ROMP(settings)
 
     while run.value:

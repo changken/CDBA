@@ -7,7 +7,28 @@ class FixBones(bpy.types.Operator):
     def execute(self, context):
         # Change Bones' name
         armature = bpy.data.armatures[context.scene.armature_name]
-        bones_mixamo = {'Hips': 'Pelvis','LeftUpLeg': 'L_Hip','RightUpLeg': 'R_Hip','Spine2': 'Spine3','Spine1': 'Spine2','Spine': 'Spine1','LeftLeg': 'L_Knee','RightLeg': 'R_Knee','LeftFoot': 'L_Ankle','RightFoot': 'R_Ankle','LeftToeBase': 'L_Foot','RightToeBase': 'R_Foot','Neck': 'Neck','LeftShoulder': 'L_Collar','RightShoulder': 'R_Collar','Head': 'Head','LeftArm': 'L_Shoulder','RightArm': 'R_Shoulder','LeftForeArm': 'L_Elbow','RightForeArm': 'R_Elbow','LeftHand': 'L_Wrist','RightHand': 'R_Wrist'}
+        bones_mixamo = {'Hips': 'Pelvis',
+        'LeftUpLeg': 'L_Hip',
+        'RightUpLeg': 'R_Hip',
+        'Spine2': 'Spine3',
+        'Spine1': 'Spine2',
+        'Spine': 'Spine1',
+        'LeftLeg': 'L_Knee',
+        'RightLeg': 'R_Knee',
+        'LeftFoot': 'L_Ankle',
+        'RightFoot': 'R_Ankle',
+        'LeftToeBase': 'L_Foot',
+        'RightToeBase': 'R_Foot',
+        'Neck': 'Neck',
+        'LeftShoulder': 'L_Collar',
+        'RightShoulder': 'R_Collar',
+        'Head': 'Head',
+        'LeftArm': 'L_Shoulder',
+        'RightArm': 'R_Shoulder',
+        'LeftForeArm': 'L_Elbow',
+        'RightForeArm': 'R_Elbow',
+        'LeftHand': 'L_Wrist',
+        'RightHand': 'R_Wrist'}
         for key in bones_mixamo:
             for bone in armature.bones:
                 if key in bone.name:
