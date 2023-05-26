@@ -25,8 +25,8 @@ CLASSES = [
 PROPS = [
     ('character_name',bpy.props.StringProperty(name='armature_name', default='Armature')),
     ('armature_name',bpy.props.StringProperty(name='character_name', default='Armature')),
-    #('character_name2',bpy.props.StringProperty(name='armature_name2', default='Armature_2')),
-    #('armature_name2',bpy.props.StringProperty(name='character_name2', default='Armature_2')),
+    ('fixbone_character_name',bpy.props.StringProperty(name='fixbone_armature_name', default='Armature')),
+    ('fixbone_armature_name',bpy.props.StringProperty(name='fixbone_character_name', default='Armature')),
     ('ip',bpy.props.StringProperty(name='ip', default='127.0.0.1')),
     ('port',bpy.props.StringProperty(name='port', default='10005')),
     ('fps',bpy.props.IntProperty(name='fps', default=24)),
