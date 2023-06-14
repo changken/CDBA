@@ -47,6 +47,9 @@ class COMMON_PT_myPanel(bpy.types.Panel):
 
         row = col.row(align = True)
         row.operator("ops.fix_bones", text = "Fix Bones")
+
+        row = col.row(align = True)
+        row.prop(ctx.scene, 'custom_character', text='Custom Character')
         
 
 class OFFLINE_PT_myPanel(bpy.types.Panel):

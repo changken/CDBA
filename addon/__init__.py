@@ -38,6 +38,7 @@ PROPS = [
     ('num_of_person',bpy.props.IntProperty(name='num_of_person', default=2)),
     ('width',bpy.props.IntProperty(name='width', default=640)),
     ('height',bpy.props.IntProperty(name='height', default=480)),
+    ('custom_character',bpy.props.BoolProperty(name='custom_character', default=False)),
 ]
 
 def register():

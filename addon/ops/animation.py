@@ -35,6 +35,8 @@ def driveCharacters(self, rotationss, translations, dims):
         character_names = str(scene.character_name).split(";")
         armature_names = str(scene.armature_name).split(";")
 
+        isCustomCharacter = scene.custom_character
+
         
         # 檢查是否有多個角色
         characters = []
@@ -47,24 +49,39 @@ def driveCharacters(self, rotationss, translations, dims):
         bones = []
 
         for j in range(len(armatures)):
-            pelvis_bones.append(armatures[j].bones['Pelvis'])
+            pelvis_bones.append(armatures[j].bones['Pelvis'] if 'Pelvis' in armatures[j].bones else armatures[j].bones['Hips'])
             pelvis_position = Vector(pelvis_bones[j].head)
             bones.append(characters[j].pose.bones)
 
-        bones_name = ['Pelvis','L_Hip','R_Hip','Spine1','L_Knee','R_Knee','Spine2','L_Ankle','R_Ankle','Spine3','L_Foot','R_Foot','Neck','L_Collar','R_Collar','Head','L_Shoulder','R_Shoulder','L_Elbow','R_Elbow','L_Wrist','R_Wrist']
+        if not isCustomCharacter:
+            bones_name = ['Pelvis','L_Hip','R_Hip','Spine1','L_Knee','R_Knee','Spine2','L_Ankle','R_Ankle','Spine3','L_Foot','R_Foot','Neck','L_Collar','R_Collar','Head','L_Shoulder','R_Shoulder','L_Elbow','R_Elbow','L_Wrist','R_Wrist']
+        else:
+            bones_name = ['Hips', 'Left leg', 'Right leg', 'Spine', 'Left knee', 'Right knee', 'Chest', 
+                         'Left ankle', 'Right ankle', 'Upper Chest', 'Left toe', 'Right toe', 
+                         'Neck', 'Left shoulder', 'Right shoulder', 'Head', 'Left arm', 'Right arm', 
+                         'Left elbow', 'Right elbow', 'Left wrist', 'Right wrist']
 
         rotations = np.array(rotationss)
         translation = np.array(translations)
 
         scene.frame_current += scene.insert_interval
         for i in range(int(dims)): 
-            if scene.translation:
-                bones[i]['Pelvis'].location = Vector((100 * translation[i][0], -100 * translation[i][1], -100 * translation[i][2]))
-            else:
-                bones[i]['Pelvis'].location = Vector((0, 0, 0))
+            if 'Pelvis' in bones[i]:
+                if scene.translation:                    
+                    bones[i]['Pelvis'].location = Vector((100 * translation[i][0], -100 * translation[i][1], -100 * translation[i][2]))
+                else:
+                    bones[i]['Pelvis'].location = Vector((0, 0, 0))
 
-            if scene.insert_keyframe:
-                bones[i]['Pelvis'].keyframe_insert('location')
+                if scene.insert_keyframe:
+                    bones[i]['Pelvis'].keyframe_insert('location')
+            else:
+                if scene.translation:                    
+                    bones[i]['Hips'].location = Vector((100 * translation[i][0], -100 * translation[i][1], -100 * translation[i][2]))
+                else:
+                    bones[i]['Hips'].location = Vector((0, 0, 0))
+
+                if scene.insert_keyframe:
+                    bones[i]['Hips'].keyframe_insert('location')
 
         for index in range(len(bones_name)):
             for i in range(int(dims)): 
@@ -74,7 +91,7 @@ def driveCharacters(self, rotationss, translations, dims):
                 quat_x_180_cw = Quaternion((1.0, 0.0, 0.0), radians(-180))
                 
 
-                if bones_name[index] == 'Pelvis':
+                if bones_name[index] == 'Pelvis' or bones_name[index] == 'Hips':
                     bone.rotation_quaternion = (quat_x_180_cw ) @ bone_rotation
                 else:
                     # 跳過骨盆以下的骨頭
@@ -82,7 +99,13 @@ def driveCharacters(self, rotationss, translations, dims):
                         print("pass")
                         continue
                     else:
-                        bone.rotation_quaternion = bone_rotation
+                        if isCustomCharacter:
+                            # 手部
+                            if index in [13, 14, 16, 17, 18, 19, 20, 21]:
+                                bone.rotation_quaternion = \
+                                    (Quaternion((1.0, 0.0, 0.0), radians(-90)) @ Quaternion((0.0, 1.0, 0.0), radians(-90))) @ bone_rotation
+                        else:
+                            bone.rotation_quaternion = bone_rotation
                 if scene.insert_keyframe:
                     bone.keyframe_insert('rotation_quaternion', frame = scene.frame_current)
 
