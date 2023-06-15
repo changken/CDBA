@@ -47,11 +47,21 @@ def driveCharacters(self, rotationss, translations, dims):
         bones = []
 
         for j in range(len(armatures)):
+            # pelvis_bones.append(armatures[j].bones['pelvis'])
             pelvis_bones.append(armatures[j].bones['Pelvis'])
             pelvis_position = Vector(pelvis_bones[j].head)
             bones.append(characters[j].pose.bones)
 
-        bones_name = ['Pelvis','L_Hip','R_Hip','Spine1','L_Knee','R_Knee','Spine2','L_Ankle','R_Ankle','Spine3','L_Foot','R_Foot','Neck','L_Collar','R_Collar','Head','L_Shoulder','R_Shoulder','L_Elbow','R_Elbow','L_Wrist','R_Wrist']
+        bones_name = ['Pelvis','L_Hip','R_Hip','Spine1','L_Knee','R_Knee','Spine2','L_Ankle',
+                      'R_Ankle','Spine3','L_Foot','R_Foot','Neck','L_Collar','R_Collar','Head','L_Shoulder','R_Shoulder','L_Elbow','R_Elbow','L_Wrist','R_Wrist']
+        '''
+        bones_name = ['pelvis','left_hip','right_hip','spine1',
+                      'left_knee','right_knee','spine2','left_ankle'
+                      ,'right_ankle','spine3','left_foot','right_foot'
+                      ,'neck','left_collar','right_collar','head',
+                      'left_shoulder','right_shoulder','left_elbow','right_elbow'
+                      ,'left_wrist','right_wrist']
+        '''
 
         rotations = np.array(rotationss)
         translation = np.array(translations)
@@ -59,11 +69,14 @@ def driveCharacters(self, rotationss, translations, dims):
         scene.frame_current += scene.insert_interval
         for i in range(int(dims)): 
             if scene.translation:
+                # bones[i]['pelvis'].location = Vector((100 * translation[i][0], -100 * translation[i][1], -100 * translation[i][2]))
                 bones[i]['Pelvis'].location = Vector((100 * translation[i][0], -100 * translation[i][1], -100 * translation[i][2]))
             else:
+                # bones[i]['pelvis'].location = Vector((0, 0, 0))
                 bones[i]['Pelvis'].location = Vector((0, 0, 0))
 
             if scene.insert_keyframe:
+                # bones[i]['pelvis'].keyframe_insert('location')
                 bones[i]['Pelvis'].keyframe_insert('location')
 
         for index in range(len(bones_name)):
@@ -74,6 +87,7 @@ def driveCharacters(self, rotationss, translations, dims):
                 quat_x_180_cw = Quaternion((1.0, 0.0, 0.0), radians(-180))
                 
 
+                # if bones_name[index] == 'pelvis':
                 if bones_name[index] == 'Pelvis':
                     bone.rotation_quaternion = (quat_x_180_cw ) @ bone_rotation
                 else:
@@ -159,11 +173,13 @@ class OfflineAnimation(Operator, ImportHelper):
                     'type': 'init',
                     'gpu': str(ctx.scene.gpu),
                     'mode': 'image',
+                    'num_of_person': int(ctx.scene.num_of_person)
                 }
             ).encode('utf-8')
             self.client.send(packData(init))
 
             img_array = cv2.imread(self.filepath)
+            print(img_array)
             img_string = encodeImg(img_array)
             image = json.dumps(
                 {
@@ -173,7 +189,7 @@ class OfflineAnimation(Operator, ImportHelper):
             ).encode('utf-8')
             img_package = packData(image)
             self.client.send(img_package)
-            data = self.client.recv(8192).decode('utf-8')
+            data = self.client.recv(32768).decode('utf-8')
 
             if data != 'none':
                 data = json.loads(data)
@@ -222,7 +238,7 @@ class OfflineAnimation(Operator, ImportHelper):
                 img_package = packData(image)
                 self.client.send(img_package)
 
-                data = self.client.recv(8192).decode('utf-8')
+                data = self.client.recv(32768).decode('utf-8')
                 if data != 'none':
                     data = json.loads(data)
                     if not driveCharacters(self, data['poses'], data['trans'], data['dims']):
@@ -296,7 +312,7 @@ class WebcamAnimation(Operator):
             ).encode('utf-8')
             img_package = packData(image)
             self.client.send(img_package)
-            data = self.client.recv(8192).decode('utf-8')
+            data = self.client.recv(32768).decode('utf-8')
             if data != 'none':
                 data = json.loads(data)
                 if not driveCharacters(self, data['poses'], data['trans'], data['dims']):

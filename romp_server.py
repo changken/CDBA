@@ -110,7 +110,8 @@ def run_romp(client, receiver, sender, run, mode, gpu, num_of_person):
         if not receiver.empty():
             try:
                 image = np.array(receiver.get(), dtype=np.uint8)
-            except:
+            except err:
+                print(err)
                 continue
 
             if mode == 'webcam':
