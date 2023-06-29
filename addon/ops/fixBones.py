@@ -7,7 +7,6 @@ class FixBones(bpy.types.Operator):
     def execute(self, context):
         # Change Bones' name
         armature = bpy.data.armatures[context.scene.fixbone_armature_name]
-        '''
         bones_mixamo = {'Hips': 'Pelvis',
         'LeftUpLeg': 'L_Hip',
         'RightUpLeg': 'R_Hip',
@@ -30,8 +29,8 @@ class FixBones(bpy.types.Operator):
         'RightForeArm': 'R_Elbow',
         'LeftHand': 'L_Wrist',
         'RightHand': 'R_Wrist'}
-        '''
         # vrm format
+        '''
         bones_mixamo = {
             'Hips': 'Pelvis',
             'Left leg': 'L_Hip',
@@ -56,6 +55,7 @@ class FixBones(bpy.types.Operator):
             'Left wrist': 'L_Wrist',
             'Right wrist': 'R_Wrist'
         }
+        '''
         for key in bones_mixamo:
             for bone in armature.bones:
                 if key in bone.name:
@@ -70,7 +70,7 @@ class FixBones(bpy.types.Operator):
             object.data.edit_bones[bone].use_connect = False
         for bone in bones:
             object.data.edit_bones[bone].tail[0] = object.data.edit_bones[bone].head[0]
-            object.data.edit_bones[bone].tail[1] = object.data.edit_bones[bone].head[1] + 2
+            object.data.edit_bones[bone].tail[1] = object.data.edit_bones[bone].head[1] + 0.5
             object.data.edit_bones[bone].tail[2] = object.data.edit_bones[bone].head[2]
             object.data.edit_bones[bone].roll = 0
         bpy.ops.object.mode_set(mode='OBJECT')

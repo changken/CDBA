@@ -88,19 +88,23 @@ def reordering(source_track_ids, source_data, target_track_ids):
 def run_romp(client, receiver, sender, run, mode, gpu, num_of_person):
     # settings = bev.main.default_settings
     settings = romp.main.default_settings
+    settings.configs_yml = 'configs/v1_resnet.yml'
+    settings.model_version=1
     settings.webcam_id = 0
     settings.mode = mode
     # settings.smooth_coeff = 1
     settings.temporal_optimize = True
     settings.smooth_coeff = 0.2
 
-    if gpu == 'True' and torch.cuda.is_available():
+    if gpu == 'True' and torch.cuda.is_available() and False:
         print(gpu)
         os.environ['CUDA_VISIBLE_DEVICES'] = '0'
         settings.gpu = 0
     else:
         settings.onnx = True
-        settings.gpu = -1
+        os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+        settings.gpu = 0
+        # settings.gpu = -1
     # settings.show_largest = True
     settings.show_largest = False
     # romp_model = bev.BEV(settings)
